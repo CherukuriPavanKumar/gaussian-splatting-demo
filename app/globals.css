@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #080808;
+  --foreground: #f1f5f9;
 }
 
 @theme inline {
@@ -19,8 +19,71 @@
   }
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+}
+
+.glass-card {
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.04));
+  backdrop-filter: blur(14px);
+}
+
+.hero-reveal {
+  animation: hero-reveal 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.hero-reveal-delay {
+  animation: hero-reveal 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.12s both;
+}
+
+.hero-reveal-delay-2 {
+  animation: hero-reveal 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.25s both;
+}
+
+.hero-reveal-delay-3 {
+  animation: hero-reveal 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.38s both;
+}
+
+.mesh-glow {
+  animation: mesh-drift 12s ease-in-out infinite;
+}
+
+.mesh-glow-delayed {
+  animation: mesh-drift 16s ease-in-out infinite reverse;
+}
+
+@keyframes hero-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(26px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes mesh-drift {
+  0% {
+    transform: translate3d(-50%, -52%, 0) scale(0.98);
+    opacity: 0.58;
+  }
+
+  50% {
+    transform: translate3d(-48%, -49%, 0) scale(1.04);
+    opacity: 0.82;
+  }
+
+  100% {
+    transform: translate3d(-50%, -52%, 0) scale(0.98);
+    opacity: 0.58;
+  }
 }
