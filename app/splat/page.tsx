@@ -7,7 +7,7 @@ const GaussianViewer = dynamic(() => import("@/components/GaussianViewer"), {
 });
 
 export default function SplatDemoPage() {
-  const splatUrl = process.env.NEXT_PUBLIC_SPLAT_URL || "/room.ply";
+  const splatUrl = process.env.NEXT_PUBLIC_SPLAT_URL || "/room.spz";
 
   return (
     <main className="min-h-screen w-full bg-[#080808] p-6 md:p-10">

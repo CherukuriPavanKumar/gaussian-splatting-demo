@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { PackedSplats, SparkRenderer, SplatMesh } from "@sparkjsdev/spark";
+import createSpzModule from "@adobe/spz";
 
 export interface GaussianViewerProps {
   splatUrl: string;
@@ -246,7 +247,7 @@ export default function GaussianViewer({
   height = 600,
   splatAlphaRemovalThreshold = 10,
   onLoad,
-  orientationPreset = "auto",
+  orientationPreset = "identity",
   keyboardControls = true,
   controlMode = "hybrid",
   movementSpeed = 2.4,
@@ -439,7 +440,7 @@ export default function GaussianViewer({
 
     const createMesh = async () => {
       try {
-        const fileBytes = await fetchFileWithProgress(
+        let fileBytes = await fetchFileWithProgress(
           splatUrl,
           downloadAbortController.signal,
           updateProgress,
@@ -447,6 +448,31 @@ export default function GaussianViewer({
 
         if (disposed) {
           return;
+        }
+
+        // --- SPZ v4 Parsing and Transcoding ---
+        try {
+          if (fileBytes.byteLength > 4) {
+            const magic = new Uint32Array(fileBytes.buffer, fileBytes.byteOffset, 1)[0];
+            // 0x5053474e corresponds to "NGSP" (SPZ v4 header magic) in little-endian
+            if (magic === 0x5053474e) {
+              console.log("[GaussianViewer] Detected SPZ v4 format. Transcoding to v3 for SparkJS...");
+              const spz = await createSpzModule();
+              const cloud = spz.loadSpzFromBuffer(fileBytes, { to: spz.CoordinateSystem.UNSPECIFIED });
+              
+              // Downgrade to SPZ v3 in-memory so the legacy parser inside SparkJS can read it.
+              // Note: We maintain the benefits of SPZ v4 for the initial network transfer.
+              fileBytes = spz.saveSpzToBuffer(cloud, { 
+                version: 3, 
+                from: spz.CoordinateSystem.UNSPECIFIED,
+                sh1Bits: 5,
+                shRestBits: 4 
+              });
+              console.log("[GaussianViewer] Successfully transcoded to SPZ v3.");
+            }
+          }
+        } catch (transcodeErr) {
+          console.warn("[GaussianViewer] SPZ validation or transcode failed:", transcodeErr);
         }
 
         const meshOptions: ExtendedSplatMeshOptions = {
